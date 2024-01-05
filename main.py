@@ -1,10 +1,12 @@
+import os
 from requests import Session
 from time import time
+import getpass
 import pandas as pd
-
 client = Session() # http requests client
 
 BASE_URL = "https://app.apollo.io/api/v1/"
+
 
 main_headers = {
     'authority': 'app.apollo.io',
@@ -58,7 +60,9 @@ def get_lists():
             print(f"{len(saved_lists)}: "+label['name'])
         if request_payload['page']>= json_res['pagination']['total_pages']:break
         request_payload['page'] +=1
-    return saved_lists[int(input('[?] Enter Choice: '))-1]['id']
+    if len(saved_lists):
+        return saved_lists[int(input('[?] Enter Choice: '))-1]['id']
+    else: return False
 
 
 def scrape_list(id):
@@ -68,29 +72,41 @@ def scrape_list(id):
         response = client.post(BASE_URL+"mixed_companies/search",json=request_payload)
         json_res = response.json()
         accounts = json_res['accounts']
+        
         companies_list.extend([
             {
-                "Name":account['name'],
-                "City":account['organization_city'],
-                "Country":account['organization_country'],
-                "Postal_code":account['organization_postal_code'],
-                "State":account['organization_state'],
-                "Street_address":account['organization_street_address'],
-                'Phone':account['phone'],
-                'Founded_year': account['founded_year'],
-                "Facebook":account['facebook_url'],
-                "Linkedin": account['linkedin_url'],
-                "Twitter": account['twitter_url'],
-                "Blog": account['blog_url'],
-                "Crunchbase": account['crunchbase_url'],
-                "Website": account['website_url'],                
+                "Name":account.get('name',None),
+                "City":account.get('organization_city',None),
+                "Country":account.get('organization_country',None),
+                "Postal_code":account.get('organization_postal_code',None),
+                "State":account.get('organization_state',None),
+                "Street_address":account.get('organization_street_address',None),
+                'Phone':account.get('phone',None),
+                'Founded_year': account.get('founded_year',None),
+                "Facebook":account.get('facebook_url',None),
+                "Linkedin": account.get('linkedin_url',None),
+                "Twitter": account.get('twitter_url',None),
+                "Blog": account.get('blog_url',None),
+                "Crunchbase": account.get('crunchbase_url',None),
+                "Website": account.get('website_url',None),                
             } for account in accounts])
+        print(f"[!] {len(companies_list)}/{json_res['pagination']['total_entries']}")
         if request_payload['page'] >=json_res['pagination']['total_pages']: break
         request_payload['page'] +=1
     return companies_list
-    
+
+save_file = lambda results,filepath : pd.DataFrame(results).to_csv(filepath,index=False,mode='a',header=not os.path.exists(filepath))
+
 if __name__ == "__main__":
-    # hjw6sryf0gvdxws@colesac.info
-    if login('hjw6sryf0gvdxws@colesac.info','(Pakistan99)'):
-        if get_lists():
-            
+    email = input('[?] Email: ')
+    password = getpass.getpass(prompt='[?] Password: ')
+    if login(email,password):
+        while True:
+            id = get_lists()
+            if id:
+                results = scrape_list(id)
+                save_file(results,"companies_data.csv")
+                if input('[?] Do you wanna scrape more (Y?N): ').lower()=='n':break
+            else:
+                print("[!] No List Found...")
+                break
