@@ -1,39 +1,43 @@
-# Apollo.io Scraper
+# Apollo.io Data Scraper
 
-## Overview
-This Python script allows you to scrape company data from Apollo.io using the Apollo API. It logs in to the Apollo.io platform using provided credentials and retrieves company information from a specified list.
+This Python script allows you to scrape data from [Apollo.io](https://app.apollo.io/) using their API. It can retrieve information about companies and people associated with specific lists.
 
 ## Prerequisites
-- Python 3.x
-- Required Python packages: `os`, `requests`, `time`, `getpass`, `pandas`
+
+Before using the script, ensure you have the following:
+
+- Python installed (version 3.x recommended)
+- Required Python packages installed: `requests`, `pandas`
+
+```bash
+pip install requests pandas
+```
 
 ## Usage
-1. Install the required packages:
-   ```bash
-   pip install requests pandas
-   ```
 
-2. Run the script:
-   ```bash
-   python apollo_scraper.py
-   ```
+1. Clone the repository or download the script directly.
+2. Open a terminal or command prompt and navigate to the directory containing the script.
+3. Run the script using the following command:
 
-3. Enter your Apollo.io email and password when prompted.
+```bash
+python apollo_scraper.py
+```
 
-4. The script will prompt you to choose a list from your Apollo.io account. Enter the desired list number.
+4. Enter your Apollo.io credentials (email and password) when prompted.
+5. Choose whether to scrape data for people or companies.
+6. Select the list you want to scrape data from.
+7. The script will start scraping the data and save it to a CSV file (`companies_data.csv` for companies, `people_data.csv` for people).
+8. If you want to scrape more lists, the script will prompt you accordingly.
 
-5. The script will then scrape company information from the selected list and save it to a CSV file named `companies_data.csv` in the script's directory.
-
-6. If you want to scrape more lists, the script will ask if you want to continue. Enter 'Y' to scrape more lists or 'N' to exit.
-
-## Important Notes
-- Make sure to keep your Apollo.io credentials secure.
-- The script appends the scraped data to the `companies_data.csv` file. If you want to start with a fresh file, delete the existing CSV file.
+**Note:** It is advisable to review and understand Apollo.io's terms of service and API usage policies before using this script.
 
 ## Disclaimer
-This script is for educational and personal use only. Be aware of the terms of service of the platforms you are scraping data from, and use this script responsibly.
 
-## Author
-[Ahmad Raza]
+This script is provided for educational and informational purposes only. Use it responsibly and ensure compliance with Apollo.io's terms of service. The script author is not responsible for any misuse or violation of terms.
 
-Feel free to modify the script to suit your needs and contribute to its improvement!
+## References
+
+- [Apollo.io API Documentation](https://docs.apollo.io/docs/introduction)
+- [Requests Library Documentation](https://docs.python-requests.org/en/latest/)
+
+Feel free to customize the script based on your specific needs or contribute to its improvement. Happy scraping!
