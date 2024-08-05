@@ -110,11 +110,15 @@ def scrape_list(id):
     companies_list = []
     while True:
         response = client.post(BASE_URL+"mixed_%s/search"%sear_for,json=request_payload)
-        json_res = response.json()
-        companies_list.extend(parse_for_companies(json_res['accounts']) if com_peop=='c' else parse_for_people(json_res['contacts']))
-        print(f"[!] {len(companies_list)}/{json_res['pagination']['total_entries']}")
-        if request_payload['page'] >=json_res['pagination']['total_pages']: break
-        request_payload['page'] +=1
+        if response.status_code == 200:
+            json_res = response.json()
+            companies_list.extend(parse_for_companies(json_res['accounts']) if com_peop=='c' else parse_for_people(json_res['contacts']))
+            print(f"[!] {len(companies_list)}/{json_res['pagination']['total_entries']}")
+            if request_payload['page'] >=json_res['pagination']['total_pages']: break
+            request_payload['page'] +=1
+        elif response.status_code == 422:
+            print(f'[ERROR] - {response.json().get('code',"Unexpected Error ...")}')
+            return companies_list
     return companies_list
 
 save_file = lambda results,filepath : pd.DataFrame(results).to_csv(filepath,index=False,mode='a',header=not os.path.exists(filepath))
