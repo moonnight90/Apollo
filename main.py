@@ -119,6 +119,9 @@ def scrape_list(id):
         elif response.status_code == 422:
             print(f'[ERROR] - {response.json().get('code',"Unexpected Error ...")}')
             return companies_list
+        else:
+            print('[ERROR] - Unexpected Error ...')
+            return companies_list
     return companies_list
 
 save_file = lambda results,filepath : pd.DataFrame(results).to_csv(filepath,index=False,mode='a',header=not os.path.exists(filepath))
