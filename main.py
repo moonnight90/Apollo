@@ -80,6 +80,48 @@ def parse_for_companies(accounts): return [{
         "Crunchbase": account.get('crunchbase_url',None),
         "Website": account.get('website_url',None)} for account in accounts]
 
+def process_contacts(id):
+    
+    url = BASE_URL+f'contact_enhancements/enhance_direct_dials'
+    payload = {
+        "contact_ids":[id],"cacheKey":round(time()*1000)
+        }
+
+    response = client.post(url,json=payload)
+    if response.status_code == 200:
+        print("[!] - Processing contacts for {} ...".format(id))
+        return True
+    elif response.status_code == 422:
+        print(f"[ERROR] - Quota limit exceeded! {response.json().get('code','')}")
+    else:
+        print('[ERROR] - Unexpected Error while processing contacts ... {}'.format(response.status_code))
+        return False
+
+def fetch_contacts(id):
+    if not process_contacts(id):
+        return {}
+    params = {
+        'cacheKey': round(time()*1000),
+    }
+
+    print("[!] - Fetching contacts for {} ...".format(id))
+    response = client.get(BASE_URL+f'contacts/{id}',params=params)
+    tmp = {
+        "Phone(mobile)":"",
+        "Phone(other)":"",
+        "Phone(work_hq)":""
+    }
+    if response.status_code == 200:
+        json_resp = response.json()
+        phone_numbers = json_resp.get('contact',{}).get('phone_numbers',[])
+        return {**tmp,**{f"Phone({phone['type']})": phone.get('raw_number',"") for phone in phone_numbers}}
+    elif response.status_code == 422:
+        print(f"[ERROR] - Quota limit exceeded! {response.json().get('code','')}")
+        return {**tmp}
+    else:
+        print('[ERROR] - Unexpected Error while fetching contacts ...{}'.format(response.status_code))
+        return {**tmp}
+
 def parse_for_people(accounts): return [{
     "First_name":account.get('first_name',None),
     "Last_name": account.get('last_name',None),
@@ -100,8 +142,10 @@ def parse_for_people(accounts): return [{
     "Company_linkedin": account.get('account',{}).get('linkedin_url',None),
     "Company_blog": account.get('account',{}).get('blog_url',None),
     "Company_crunchbase": account.get('account',{}).get('crunchbase_url',None),
+    **fetch_contacts(account.get('id',None)),
 
     } for account in accounts]
+
 
 
 def scrape_list(id):
@@ -123,6 +167,9 @@ def scrape_list(id):
             print('[ERROR] - Unexpected Error ...')
             return companies_list
     return companies_list
+
+
+    
 
 save_file = lambda results,filepath : pd.DataFrame(results).to_csv(filepath,index=False,mode='a',header=not os.path.exists(filepath))
 
